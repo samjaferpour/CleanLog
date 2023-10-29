@@ -1,6 +1,8 @@
 ﻿using CleanLog.LogCategories;
 using Microsoft.AspNetCore.Http;
 using Serilog;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace CleanLog
 {
@@ -52,6 +54,26 @@ namespace CleanLog
                     DateTime.Now
                 );
             _logger.Error($"ErrorLog: {errorLog}");
+        }
+
+        public async Task RequestLog(string applicationName, string traceId, string clientIp, string requestPath, string version, string controllerName, string actionName, string requestHttpMethod, DateTime createdAt, string requestBody, string responseBody, string responseTime)
+        {
+            var requestLog = new RequestLog
+            (
+             applicationName,
+             traceId,
+             clientIp.ToString(),
+             requestPath,
+             version.ToString() ?? string.Empty,
+             controllerName.ToString() ?? string.Empty,
+             actionName.ToString() ?? string.Empty,
+             requestHttpMethod,
+             DateTime.Now,
+             requestBody,
+             responseBody,
+             responseTime
+            );
+            _logger.Information($"RequestLog: {requestLog}");
         }
     }
 }

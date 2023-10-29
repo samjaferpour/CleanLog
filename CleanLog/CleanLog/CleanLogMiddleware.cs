@@ -1,8 +1,8 @@
-﻿using CleanLog.LogCategories;
+﻿using CleanLog;
+using CleanLog.LogCategories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Diagnostics;
 using System.Reflection;
@@ -12,12 +12,12 @@ namespace OmidBank.Common.Log
     public class CleanLogMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<CleanLogMiddleware> _logger;
+        private readonly ICleanLogger _cleanLogger;
 
-        public CleanLogMiddleware(RequestDelegate next, ILogger<CleanLogMiddleware> logger)
+        public CleanLogMiddleware(RequestDelegate next, ICleanLogger cleanLogger)
         {
             _next = next;
-            _logger = logger;
+            _cleanLogger = cleanLogger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -53,22 +53,17 @@ namespace OmidBank.Common.Log
 
             stopwatch.Stop();
 
-            var requestLog = new RequestLog
-            (
-             applicationName,
-             traceId,
-             clientIp.ToString(),
-             requestPath,
-             version.ToString() ?? string.Empty,
-             controllerName.ToString() ?? string.Empty,
-             actionName.ToString() ?? string.Empty,
-             requestHttpMethod,
-             DateTime.Now,
-             requestBody,
-             responseBodyText,
-             stopwatch.ElapsedMilliseconds.ToString()
-            );
-            _logger.LogInformation($"RequestLog: {requestLog}");
+            await _cleanLogger.RequestLog(applicationName ?? string.Empty,
+                                    traceId,clientIp.ToString(),
+                                    requestPath,
+                                    version.ToString() ?? string.Empty,
+                                    controllerName.ToString() ?? string.Empty,
+                                    actionName.ToString() ?? string.Empty,
+                                    requestHttpMethod,
+                                    DateTime.Now,
+                                    requestBody,
+                                    responseBodyText,
+                                    stopwatch.ElapsedMilliseconds.ToString());
         }
         #region private methods
         private async Task<string> ReadBodyFromRequest(HttpRequest request)
@@ -85,9 +80,9 @@ namespace OmidBank.Common.Log
 
     public static class RequestLogMiddlewareExtension
     {
-        public static void UseCleanLog(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseCleanLog(this IApplicationBuilder builder)
         {
-            builder.UseMiddleware<CleanLogMiddleware>();
+            return builder.UseMiddleware<CleanLogMiddleware>();
         }
     }
 }
