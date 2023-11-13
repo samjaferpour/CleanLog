@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using OmidBank.Common.Log;
-
 namespace CleanLog
 {
     public static class ServiceCollectionExtensions

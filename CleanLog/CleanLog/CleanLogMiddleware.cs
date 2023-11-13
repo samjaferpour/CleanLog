@@ -7,7 +7,7 @@ using Serilog;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace OmidBank.Common.Log
+namespace CleanLog
 {
     public class CleanLogMiddleware
     {
